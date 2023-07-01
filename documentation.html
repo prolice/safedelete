@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SecureFileDelete Documentation</title>
+  <style>
+    pre {
+      background-color: #f4f4f4;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>SecureFileDelete Documentation</h1>
+
+  <h2>Introduction</h2>
+  <p>
+    The code provided is a C# implementation of a tool called "SecureFileDelete." It is a command-line utility that securely deletes files from a specified folder based on certain criteria. The tool ensures that the deleted files are securely overwritten to prevent any potential recovery of sensitive data.
+  </p>
+
+  <h2>Components</h2>
+
+  <h3>Main method</h3>
+  <p>
+    This is the entry point of the program. It parses the command-line arguments, checks if the required parameters are provided, and then calls the PerformSecureFileDeletion method to initiate the secure file deletion process.
+  </p>
+  <pre><code>
+    // Main method code here
+  </code></pre>
+
+  <h3>Usage method</h3>
+  <p>
+    This method prints the usage instructions and explains the available parameters and their usage.
+  </p>
+  <pre><code>
+    // Usage method code here
+  </code></pre>
+
+  <h3>PerformSecureFileDeletion method</h3>
+  <p>
+    This method takes the parsed command-line arguments and performs the secure file deletion operation. It retrieves the folder path, time limit, file pattern, and excluded files from the arguments. It then finds the files in the specified folder that match the criteria and securely deletes them.
+  </p>
+  <pre><code>
+    // PerformSecureFileDeletion method code here
+  </code></pre>
+
+  <h3>ParseArguments method</h3>
+  <p>
+    This method parses the command-line arguments passed to the program and creates a CommandLineArguments object that stores the parameter-value pairs.
+  </p>
+  <pre><code>
+    // ParseArguments method code here
+  </code></pre>
+
+  <h3>CommandLineArguments class</h3>
+  <p>
+    This class represents the parsed command-line arguments. It provides methods to add parameters, check if a parameter exists, and retrieve the value of a parameter.
+  </p>
+  <pre><code>
+    // CommandLineArguments class code here
+  </code></pre>
+
+  <h3>PerformSecureFileDeletion method (overload)</h3>
+  <p>
+    This method performs the actual secure file deletion. It takes the folder path, time limit, file pattern, and excluded files as parameters. It retrieves the files from the folder that match the criteria and securely deletes them one by one.
+  </p>
+  <pre><code>
+    // PerformSecureFileDeletion method (overload) code here
+  </code></pre>
+
+  <h3>SecureDeleteFile method</h3>
+  <p>
+    This method securely deletes a single file. It performs multiple iterations of overwriting the file's content with random data, null values, zero values, alternating patterns, and encrypted random data using various steps and algorithms.
+  </p>
+  <pre><code>
+    // SecureDeleteFile method code here
+  </code></pre>
+
+  <h3>Helper methods</h3>
+  <p>
+    These methods (GetParameterValue, OverwriteWithRandomData, OverwriteWithNullValues, OverwriteWithZeroValues, OverwriteWithAlternatingPattern, OverwriteWithEncryptedRandomData) are used by the SecureDeleteFile method to overwrite the file's content with secure data.
+  </p>
+  <pre><code>
+    // Helper methods code here
+  </code></pre>
+
+  <h2>Summary</h2>
+  <p>
+    Overall, this code provides a utility to securely delete files from a folder while ensuring that the deleted files cannot be easily recovered.
+  </p>
+</body>
+</html>
