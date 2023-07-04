@@ -12,12 +12,18 @@ class SecureFileDelete
         // Parse command line arguments
         CommandLineArguments arguments = ParseArguments(args);
 
-        // Check if the folder parameter is provided
-        if (!arguments.ContainsParameter("folder"))
+        if (arguments.ContainsParameter("help") || arguments.ContainsParameter("h"))
         {
-            Console.WriteLine("Missing required parameter: --folder");
             Usage();
-            Environment.Exit(1);
+            return;
+        }
+
+        // Check if the folder parameter is provided
+        if (!(arguments.ContainsParameter("folder") || arguments.ContainsParameter("f")))
+        {
+            Console.WriteLine("Missing required parameter: --folder or -f");
+            Usage();
+            return;
         }
 
         // Perform secure file deletion
@@ -26,28 +32,57 @@ class SecureFileDelete
 
     static void Usage()
     {
-        Console.WriteLine("Usage: safedelete --folder <folder_path> [--time_limit <minutes>] [--pattern <file_pattern>] [--exclude_files <file1,file2,...>]");
-        Console.WriteLine("Example: safedelete --folder C:\\Data --time_limit 60 --pattern *.txt --exclude_files file1.txt,file2.txt");
+        Console.WriteLine("Usage: safedelete --folder <folder_path> [--time_limit <minutes>] [--pattern <file_pattern>] [--exclude_files <file1,file2,...>] [--recursive]");
+        Console.WriteLine("       safedelete -f <folder_path> [-t <minutes>] [-p <file_pattern>] [-e <file1,file2,...>] [-r]");
         Console.WriteLine();
         Console.WriteLine("Parameters:");
-        Console.WriteLine("  --folder         : The path of the folder to delete files from. (required)");
-        Console.WriteLine("  --time_limit     : The time limit (in minutes) specifying the maximum file age. (optional)");
-        Console.WriteLine("  --pattern        : The file name pattern to match. (optional)");
-        Console.WriteLine("  --exclude_files  : Comma-separated list of files to exclude from deletion. (optional)");
+        Console.WriteLine("  --folder, -f          : The path of the folder to delete files from. (required)");
+        Console.WriteLine("  --time_limit, -t      : The time limit (in minutes) specifying the maximum file age. (optional)");
+        Console.WriteLine("  --pattern, -p         : The file name pattern to match. (optional)");
+        Console.WriteLine("  --exclude_files, -e   : Comma-separated list of files to exclude from deletion. (optional)");
+        Console.WriteLine("  --recursive, -r       : Search for files in all subfolders. (optional)");
+        Console.WriteLine("  --help, -h            : Display usage information. (optional)");
     }
+
 
 
     static void PerformSecureFileDeletion(CommandLineArguments arguments)
     {
+        // Map short parameter aliases to their corresponding full parameter names
+        Dictionary<string, string> shortToFull = new Dictionary<string, string>()
+    {
+        { "f", "folder" },
+        { "t", "time_limit" },
+        { "p", "pattern" },
+        { "e", "exclude_files" },
+        { "r", "recursive" },
+        { "h", "help"}
+    };
+
+        // Check short parameters and update the corresponding full parameter name
+        foreach (var entry in shortToFull)
+        {
+            string shortParam = entry.Key;
+            string fullParam = entry.Value;
+
+            if (arguments.ContainsParameter(shortParam))
+            {
+                arguments.AddParameter(fullParam, arguments.GetValue<string>(shortParam));
+                arguments.RemoveParameter(shortParam);
+            }
+        }
+
         string folder = arguments.ContainsParameter("folder") ? arguments.GetValue<string>("folder") : string.Empty;
         int? timeLimit = arguments.ContainsParameter("time_limit") ? arguments.GetValue<int>("time_limit") : null;
         string pattern = arguments.ContainsParameter("pattern") ? arguments.GetValue<string>("pattern") : string.Empty;
         List<string> excludeFiles = arguments.ContainsParameter("exclude_files") ? arguments.GetValue<string>("exclude_files").Split(',').ToList() : new List<string>();
+        bool recursive = arguments.ContainsParameter("recursive");
 
         // Perform secure file deletion
-        PerformSecureFileDeletion(folder, timeLimit, pattern, excludeFiles);
+        PerformSecureFileDeletion(folder, timeLimit, pattern, excludeFiles, recursive);
     }
- 
+
+
     static CommandLineArguments ParseArguments(string[] args)
     {
         if (args.Length == 0)
@@ -62,26 +97,27 @@ class SecureFileDelete
         {
             string arg = args[i];
 
-            if (arg.StartsWith("--"))
+            if (arg.StartsWith("--") || arg.StartsWith("-"))
             {
-                string parameterName = arg.Substring(2);
+                string parameterName = arg.StartsWith("--") ? arg.Substring(2) : arg.Substring(1);
 
-                if (i + 1 < args.Length)
+                if (i + 1 < args.Length && !args[i + 1].StartsWith("--") && !args[i + 1].StartsWith("-"))
                 {
                     string parameterValue = args[i + 1];
                     arguments.AddParameter(parameterName, parameterValue);
+                    i++; // Skip the next argument as it is the value for the current parameter
                 }
                 else
                 {
-                    // Handle missing value for parameter error
-                    Console.WriteLine($"Missing value for parameter: {parameterName}");
-                    Environment.Exit(1);
+                    // Handle boolean parameters with no value
+                    arguments.AddParameter(parameterName, string.Empty);
                 }
             }
         }
 
         return arguments;
     }
+
 
     class CommandLineArguments
     {
@@ -123,28 +159,33 @@ class SecureFileDelete
 
             return default;
         }
+
+        public void RemoveParameter(string name)
+        {
+            parameters.Remove(name);
+        }
     }
 
-    static void PerformSecureFileDeletion(string folder, int? timeLimit, string pattern, List<string> excludeFiles)
+    static void PerformSecureFileDeletion(string folder, int? timeLimit, string pattern, List<string> excludeFiles, bool recursive)
     {
         try
         {
-            // Get the files in the folder that match the specified criteria
+            // Get the files in the folder (and subfolders if recursive is true) that match the specified criteria
             DirectoryInfo directory = new DirectoryInfo(folder);
+            SearchOption searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             FileInfo[] files;
-            int timeLimitValue;
 
             if (timeLimit != null)
             {
-                timeLimitValue = (int)timeLimit;
-                files = directory.GetFiles()
-                    .Where(file => file.CreationTime > DateTime.Now.AddMinutes(-timeLimitValue) && file.Name.Contains(pattern) && !excludeFiles.Contains(file.Name))
+                int timeLimitValue = (int)timeLimit;
+                files = directory.GetFiles(pattern, searchOption)
+                    .Where(file => file.CreationTime > DateTime.Now.AddMinutes(-timeLimitValue) && !excludeFiles.Contains(file.Name))
                     .ToArray();
             }
             else
             {
-                files = directory.GetFiles()
-                    .Where(file => file.Name.Contains(pattern) && !excludeFiles.Contains(file.Name))
+                files = directory.GetFiles(pattern, searchOption)
+                    .Where(file => !excludeFiles.Contains(file.Name))
                     .ToArray();
             }
 
@@ -160,10 +201,21 @@ class SecureFileDelete
                 Console.WriteLine(file.FullName);
             }
 
-            foreach (FileInfo file in files)
+            // Confirm file deletion
+            Console.Write("Are you sure you want to delete these files? (yes/no): ");
+            string confirmation = Console.ReadLine()?.Trim().ToLower();
+
+            if (confirmation.Contains("y"))
             {
-                SecureDeleteFile(file.FullName);
-                Console.WriteLine("File securely deleted: " + file.FullName);
+                foreach (FileInfo file in files)
+                {
+                    SecureDeleteFile(file.FullName);
+                    Console.WriteLine("File securely deleted: " + file.FullName);
+                }
+            }
+            else
+            {
+                Console.WriteLine("File deletion canceled.");
             }
 
         }

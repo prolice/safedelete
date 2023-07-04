@@ -2,7 +2,7 @@
   "profiles": {
     "safedelete": {
       "commandName": "Project",
-      "commandLineArgs": "--folder C:\\Users\\christophe\\Downloads --time_limit 60 --exclude_files safedelete.cmd,SafeDelete.cs,safedelete-namedParameters.cmd"
+      "commandLineArgs": "--help"
     }
   }
 }
