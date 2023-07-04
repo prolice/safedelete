@@ -1,82 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SecureFileDelete User Manual</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    h2 {
-      margin-top: 20px;
-    }
-
-    pre {
-      background-color: #f5f5f5;
-      padding: 10px;
-      overflow-x: auto;
-    }
-  </style>
+    <title>Secure File Delete - User Manual</title>
 </head>
 <body>
-  <h1>SecureFileDelete User Manual</h1>
+    <h1>Secure File Delete - User Manual</h1>
 
-  <h2>Introduction</h2>
-  <p>SecureFileDelete is a command-line tool that securely deletes files from a specified folder while ensuring that the deleted files cannot be easily recovered. This tool overwrites the file content with multiple iterations of random data, null values, zero values, alternating patterns, and encrypted random data using various steps and algorithms.</p>
+    <h2>Usage</h2>
+    <pre><code>safedelete --folder &lt;folder_path&gt; [--time_limit &lt;minutes&gt;] [--pattern &lt;file_pattern&gt;] [--exclude_files &lt;file1,file2,...&gt;] [--recursive]
+safedelete -f &lt;folder_path&gt; [-t &lt;minutes&gt;] [-p &lt;file_pattern&gt;] [-e &lt;file1,file2,...&gt;] [-r]
+  </code></pre>
 
-  <h2>System Requirements</h2>
-  <p>To use the SecureFileDelete tool, make sure your system meets the following requirements:</p>
-  <ul>
-    <li>Operating System: Windows</li>
-    <li>.NET Framework: Version 4.7 or above</li>
-  </ul>
+    <h3>Parameters</h3>
+    <ul>
+        <li><code>--folder, -f</code>: The path of the folder to delete files from. (required)</li>
+        <li><code>--time_limit, -t</code>: The time limit (in minutes) specifying the maximum file age. (optional)</li>
+        <li><code>--pattern, -p</code>: The file name pattern to match. (optional)</li>
+        <li><code>--exclude_files, -e</code>: Comma-separated list of files to exclude from deletion. (optional)</li>
+        <li><code>--recursive, -r</code>: Search for files in all subfolders. (optional)</li>
+        <li><code>--help, -h</code>: Display usage information. (optional)</li>
+    </ul>
 
-  <h2>Installation</h2>
-  <p>The SecureFileDelete tool does not require any installation process. You can directly use the provided C# code to compile and run the tool.</p>
+    <h2>Getting Started</h2>
+    <ol>
+        <li>Clone the repository or download the code.</li>
+        <li>Build the application using Visual Studio or the .NET command-line tools.</li>
+        <li>Open a command prompt or terminal and navigate to the build output directory.</li>
+        <li>Run the <code>safedelete</code> command with the desired parameters.</li>
+    </ol>
 
-  <h2>Usage</h2>
-  <p>To use the SecureFileDelete tool, follow the instructions below:</p>
-  <ol>
-    <li>Open the command prompt or terminal on your system.</li>
-    <li>Navigate to the directory where the SecureFileDelete C# code file is located.</li>
-    <li>Compile the code using the C# compiler. Run the following command:</li>
-  </ol>
-  <pre>csc SecureFileDelete.cs</pre>
-  <p>This will generate an executable file named <code>SecureFileDelete.exe</code>.</p>
-  <ol start="4">
-    <li>Run the SecureFileDelete tool by executing the following command:</li>
-  </ol>
-  <pre>SecureFileDelete.exe --folder &lt;folder_path&gt; [--time_limit &lt;minutes&gt;] [--pattern &lt;file_pattern&gt;] [--exclude_files &lt;file1,file2,...&gt;]</pre>
+    <h2>Example</h2>
+    <p>To delete all text files from the "Documents" folder and its subfolders:</p>
+    <pre><code>safedelete --folder C:\Documents --pattern *.txt --recursive
+  </code></pre>
+    <p>This will securely delete all text files in the specified folder and its subfolders.</p>
 
-  <h2>Command-line Parameters</h2>
-  <p>The SecureFileDelete tool accepts the following command-line parameters:</p>
-  <ul>
-    <li><code>--folder</code>: Specifies the path of the folder from which files will be deleted. This parameter is required.</li>
-    <li><code>--time_limit</code>: Specifies the time limit (in minutes) that defines the maximum age of files to be deleted. Only files created within the specified time limit will be deleted. This parameter is optional.</li>
-    <li><code>--pattern</code>: Specifies the file name pattern to match. Only files with names containing the specified pattern will be deleted. This parameter is optional.</li>
-    <li><code>--exclude_files</code>: Specifies a comma-separated list of files to exclude from deletion. These files will be ignored during the secure file deletion process. This parameter is optional.</li>
-  </ul>
+    <h2>How It Works</h2>
+    <ol>
+        <li>Parses the command-line arguments and checks for required parameters.</li>
+        <li>Maps short parameter aliases to their corresponding full parameter names.</li>
+        <li>Performs secure file deletion based on the provided parameters.</li>
+        <li>Retrieves the list of files in the specified folder that match the criteria.</li>
+        <li>Displays the list of files to be securely deleted and prompts for confirmation.</li>
+        <li>If confirmed, securely deletes the files using multiple steps and algorithms:</li>
+        <ul>
+            <li>Renames the file multiple times with random names.</li>
+            <li>Overwrites the file content with random data, null values, zero values, alternating pattern, encrypted random data, and null values again.</li>
+            <li>Deletes the renamed file.</li>
+        </ul>
+    </ol>
 
-  <h2>Examples</h2>
-  <p>Here are some examples demonstrating the usage of the SecureFileDelete tool:</p>
-  <pre>SecureFileDelete.exe --folder C:\Data --time_limit 60 --pattern *.txt --exclude_files file1.txt,file2.txt</pre>
-
-  <h2>Important Notes</h2>
-  <ul>
-    <li>Ensure that you have appropriate permissions to delete files from the specified folder.</li>
-    <li>Use the tool responsibly and exercise caution when permanently deleting files. Once files are securely deleted, they cannot be recovered.</li>
-  </ul>
-
-  <h2>Support</h2>
-  <p>If you need further assistance or have any questions, please contact the developer or refer to the documentation provided.</p>
-
-  <h2>License</h2>
-	<p>This tool is provided under the terms of an open-source license. Please refer to the license file or documentation for more information about the specific license terms.</p>
-
+    <h2>License</h2>
+    <p>This project is licensed under the <a href="LICENSE">MIT License</a>. Feel free to modify and distribute it as needed.</p>
 </body>
 </html>
