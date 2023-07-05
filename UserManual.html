@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Secure File Delete - User Manual</title>
+    <title>User Manual - SafeDelete</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -56,51 +56,89 @@
     </style>
 </head>
 <body>
-    <h1>Secure File Delete - User Manual</h1>
+    <h1>User Manual - SafeDelete</h1>
+    <h2>Overview</h2>
+    <p>The SafeDelete program is used to securely delete files from a specified folder based on various criteria.</p>
 
     <h2>Usage</h2>
-    <pre><code>safedelete --folder &lt;folder_path&gt; [--time_limit &lt;minutes&gt;] [--pattern &lt;file_pattern&gt;] [--exclude_files &lt;file1,file2,...&gt;] [--recursive]
-safedelete -f &lt;folder_path&gt; [-t &lt;minutes&gt;] [-p &lt;file_pattern&gt;] [-e &lt;file1,file2,...&gt;] [-r]</code></pre>
+    <pre><code>Usage: safedelete --folder &lt;folder_path&gt; [--time_limit &lt;minutes&gt;] [--pattern &lt;file_pattern&gt;] [--exclude_files &lt;file1,file2,...&gt;] [--recursive]
+       safedelete -f &lt;folder_path&gt; [-t &lt;minutes&gt;] [-p &lt;file_pattern&gt;] [-e &lt;file1,file2,...&gt;] [-r]
+    
+Parameters:
+  --folder, -f          : The path of the folder to delete files from. (required)
+  --time_limit, -t      : The time limit (in minutes) specifying the maximum file age. (optional)
+  --pattern, -p         : The file name pattern to match. (optional)
+  --exclude_files, -e   : Comma-separated list of files to exclude from deletion. (optional)
+  --recursive, -r       : Search for files in all subfolders. (optional)
+  --no_prompt, -np      : Enable no prompt mode. Files will be securely deleted without confirmation. (optional)
+  --help, -h            : Display usage information. (optional)</code></pre>
 
-    <h3>Parameters</h3>
+    <h2>Command Line Arguments</h2>
+    <table>
+        <tr>
+            <th>Argument</th>
+            <th>Alias</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>--folder</td>
+            <td>-f</td>
+            <td>The path of the folder to delete files from. (required)</td>
+        </tr>
+        <tr>
+            <td>--time_limit</td>
+            <td>-t</td>
+            <td>The time limit (in minutes) specifying the maximum file age. (optional)</td>
+        </tr>
+        <tr>
+            <td>--pattern</td>
+            <td>-p</td>
+            <td>The file name pattern to match. (optional)</td>
+        </tr>
+        <tr>
+            <td>--exclude_files</td>
+            <td>-e</td>
+            <td>Comma-separated list of files to exclude from deletion. (optional)</td>
+        </tr>
+        <tr>
+            <td>--recursive</td>
+            <td>-r</td>
+            <td>Search for files in all subfolders. (optional)</td>
+        </tr>
+        <tr>
+            <td>--no_prompt</td>
+            <td>-np</td>
+            <td>Enable no prompt mode. Files will be securely deleted without confirmation. (optional)</td>
+        </tr>
+        <tr>
+            <td>--help</td>
+            <td>-h</td>
+            <td>Display usage information. (optional)</td>
+        </tr>
+    </table>
+
+    <h2>Examples</h2>
+    <pre><code>
+        safedelete --folder C:\Temp
+        safedelete -f C:\Temp -t 60 -p *.txt.   --exclude_files file1.txt,file2.txt -r
+        safedelete --folder /home/user/files --time_limit 30 --exclude_files important.docx,personal.jpg --recursive
+    </code></pre>
+
+    <h2>Notes</h2>
     <ul>
-        <li><code>--folder, -f</code>: The path of the folder to delete files from. (required)</li>
-        <li><code>--time_limit, -t</code>: The time limit (in minutes) specifying the maximum file age. (optional)</li>
-        <li><code>--pattern, -p</code>: The file name pattern to match. (optional)</li>
-        <li><code>--exclude_files, -e</code>: Comma-separated list of files to exclude from deletion. (optional)</li>
-        <li><code>--recursive, -r</code>: Search for files in all subfolders. (optional)</li>
-        <li><code>--help, -h</code>: Display usage information. (optional)</li>
+        <li>If the `--time_limit` parameter is not specified, all files in the folder will be considered for deletion.</li>
+        <li>The `--pattern` parameter accepts wildcards (*) to match multiple files. For example, `*.txt` will match all text files.</li>
+        <li>When using the `--exclude_files` parameter, provide a comma-separated list of files to exclude from deletion.</li>
+        <li>When the `--recursive` parameter is used, SafeDelete will search for files in all subfolders of the specified folder.</li>
+        <li>By default, SafeDelete prompts for confirmation before deleting each file. Use the `--no_prompt` parameter to enable no prompt mode.</li>
     </ul>
 
-    <h2>Getting Started</h2>
-    <ol>
-        <li>Clone the repository or download the code.</li>
-        <li>Build the application using Visual Studio or the .NET command-line tools.</li>
-        <li>Open a command prompt or terminal and navigate to the build output directory.</li>
-        <li>Run the <code>safedelete</code> command with the desired parameters.</li>
-    </ol>
+    <h2>Security Considerations</h2>
+    <p>SafeDelete uses secure deletion techniques to prevent file recovery. However, ensure that you have the necessary permissions to delete files from the specified folder.</p>
 
-    <h2>Example</h2>
-    <p>To delete all text files from the "Documents" folder and its subfolders:</p>
-    <pre><code>safedelete --folder C:\Documents --pattern *.txt --recursive</code></pre>
-    <p>This will securely delete all text files in the specified folder and its subfolders.</p>
+    <h2>Disclaimer</h2>
+    <p>SafeDelete is provided as-is without any warranties. Use it at your own risk.</p>
 
-    <h2>How It Works</h2>
-    <ol>
-        <li>Parses the command-line arguments and checks for required parameters.</li>
-        <li>Maps short parameter aliases to their corresponding full parameter names.</li>
-        <li>Performs secure file deletion based on the provided parameters.</li>
-        <li>Retrieves the list of files in the specified folder that match the criteria.</li>
-        <li>Displays the list of files to be securely deleted and prompts for confirmation.</li>
-        <li>If confirmed, securely deletes the files using multiple steps and algorithms:</li>
-        <ul>
-            <li>Renames the file multiple times with random names.</li>
-            <li>Overwrites the file content with random data, null values, zero values, alternating pattern, encrypted random data, and null values again.</li>
-            <li>Deletes the renamed file.</li>
-        </ul>
-    </ol>
-
-    <h2>License</h2>
-    <p>This project is licensed under the <a href="LICENSE">MIT License</a>. Feel free to modify and distribute it as needed.</p>
 </body>
 </html>
+

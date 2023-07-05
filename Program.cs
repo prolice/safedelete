@@ -12,6 +12,7 @@ class SecureFileDelete
         // Parse command line arguments
         CommandLineArguments arguments = ParseArguments(args);
 
+
         if (arguments.ContainsParameter("help") || arguments.ContainsParameter("h"))
         {
             Usage();
@@ -41,6 +42,7 @@ class SecureFileDelete
         Console.WriteLine("  --pattern, -p         : The file name pattern to match. (optional)");
         Console.WriteLine("  --exclude_files, -e   : Comma-separated list of files to exclude from deletion. (optional)");
         Console.WriteLine("  --recursive, -r       : Search for files in all subfolders. (optional)");
+        Console.WriteLine("  --no_prompt, -np      : Enable no prompt mode. Files will be securely deleted without confirmation. (optional)");
         Console.WriteLine("  --help, -h            : Display usage information. (optional)");
     }
 
@@ -56,7 +58,8 @@ class SecureFileDelete
         { "p", "pattern" },
         { "e", "exclude_files" },
         { "r", "recursive" },
-        { "h", "help"}
+        { "h", "help"},
+        { "np", "no_prompt" }
     };
 
         // Check short parameters and update the corresponding full parameter name
@@ -77,9 +80,10 @@ class SecureFileDelete
         string pattern = arguments.ContainsParameter("pattern") ? arguments.GetValue<string>("pattern") : string.Empty;
         List<string> excludeFiles = arguments.ContainsParameter("exclude_files") ? arguments.GetValue<string>("exclude_files").Split(',').ToList() : new List<string>();
         bool recursive = arguments.ContainsParameter("recursive");
+        bool noPromptMode = arguments.ContainsParameter("no_prompt");
 
         // Perform secure file deletion
-        PerformSecureFileDeletion(folder, timeLimit, pattern, excludeFiles, recursive);
+        PerformSecureFileDeletion(folder, timeLimit, pattern, excludeFiles, recursive, noPromptMode);
     }
 
 
@@ -166,7 +170,7 @@ class SecureFileDelete
         }
     }
 
-    static void PerformSecureFileDeletion(string folder, int? timeLimit, string pattern, List<string> excludeFiles, bool recursive)
+    static void PerformSecureFileDeletion(string folder, int? timeLimit, string pattern, List<string> excludeFiles, bool recursive, bool noPromptMode)
     {
         try
         {
@@ -200,10 +204,14 @@ class SecureFileDelete
             {
                 Console.WriteLine(file.FullName);
             }
-
-            // Confirm file deletion
-            Console.Write("Are you sure you want to delete these files? (yes/no): ");
-            string confirmation = Console.ReadLine()?.Trim().ToLower();
+            string confirmation = "y";
+            if (!noPromptMode)
+            {
+                // Confirm file deletion
+                Console.Write("Are you sure you want to delete these files? (yes/no): ");
+                confirmation = Console.ReadLine()?.Trim().ToLower();
+            }
+            
 
             if (confirmation.Contains("y"))
             {
@@ -217,6 +225,7 @@ class SecureFileDelete
             {
                 Console.WriteLine("File deletion canceled.");
             }
+            
 
         }
         catch (Exception ex)
