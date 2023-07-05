@@ -2,7 +2,7 @@
   "profiles": {
     "safedelete": {
       "commandName": "Project",
-      "commandLineArgs": "-f C:\\Users\\christophe\\Downloads -t 60 -p *.txt -np"
+      "commandLineArgs": "-f C:\\Users\\christophe\\Downloads -t 60 -r"
     }
   }
 }

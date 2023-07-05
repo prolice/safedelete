@@ -6,12 +6,17 @@ using System.Security.Cryptography;
 
 class SecureFileDelete
 {
-
+    // Define the version of the app
+    private static readonly string AppVersion = typeof(SecureFileDelete).Assembly.GetName().Version.ToString();
     static void Main(string[] args)
     {
+        if (args.Contains("--version"))
+        {
+            Console.WriteLine("App Version: " + AppVersion);
+            return;
+        }
         // Parse command line arguments
         CommandLineArguments arguments = ParseArguments(args);
-
 
         if (arguments.ContainsParameter("help") || arguments.ContainsParameter("h"))
         {
@@ -220,6 +225,11 @@ class SecureFileDelete
                     SecureDeleteFile(file.FullName);
                     Console.WriteLine("File securely deleted: " + file.FullName);
                 }
+
+                if (recursive)
+                {
+                    DeleteEmptySubfolders(folder);
+                }
             }
             else
             {
@@ -245,6 +255,11 @@ class SecureFileDelete
                 return;
             }
 
+            // Remove the read-only attribute if it's set
+            if (File.GetAttributes(filePath).HasFlag(FileAttributes.ReadOnly))
+            {
+                File.SetAttributes(filePath, FileAttributes.Normal);
+            }
 
             // Get the directory of the original file
             string fileDirectory = Path.GetDirectoryName(filePath);
@@ -418,4 +433,21 @@ class SecureFileDelete
             }
         }
     }
+
+    static void DeleteEmptySubfolders(string rootFolder)
+    {
+        string[] subfolders = Directory.GetDirectories(rootFolder);
+
+        foreach (string subfolder in subfolders)
+        {
+            DeleteEmptySubfolders(subfolder);
+
+            if (Directory.GetFiles(subfolder).Length == 0 && Directory.GetDirectories(subfolder).Length == 0)
+            {
+                Directory.Delete(subfolder);
+                Console.WriteLine("Empty subfolder deleted: " + subfolder);
+            }
+        }
+    }
+
 }
