@@ -187,10 +187,8 @@ class SecureFileDelete
 
             Console.WriteLine("### Files to be securely deleted ###");
 
-            /*if (timeLimit != null)
-                files.AddRange(directory.GetFiles(pattern, searchOption)
-                    .Where(file => file.CreationTime > DateTime.Now.AddMinutes(-(int)timeLimit) && !excludeFiles.Contains(file.Name)));*/
             ProcessFolder(directory, files, timeLimit, pattern, excludeFiles, searchOption);
+            
             // Process subfolders recursively
             foreach (var subDir in directory.GetDirectories("*", SearchOption.TopDirectoryOnly))
             {
@@ -204,6 +202,10 @@ class SecureFileDelete
                     // Continue processing other subfolders
                 }
             }
+
+            // Remove duplicates from the files list
+            files = files.Distinct(new FileInfoEqualityComparer()).ToList();
+
 
             if (files.Count == 0)
             {
@@ -320,7 +322,28 @@ class SecureFileDelete
         }
     }
 
+    class FileInfoEqualityComparer : IEqualityComparer<FileInfo>
+    {
+        public bool Equals(FileInfo x, FileInfo y)
+        {
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
 
+            if (x is null || y is null)
+            {
+                return false;
+            }
+
+            return string.Equals(x.FullName, y.FullName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public int GetHashCode(FileInfo obj)
+        {
+            return obj.FullName.GetHashCode();
+        }
+    }
 
     static void SecureDeleteFile(string filePath)
     {
