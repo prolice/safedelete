@@ -187,6 +187,10 @@ class SecureFileDelete
 
             Console.WriteLine("### Files to be securely deleted ###");
 
+            /*if (timeLimit != null)
+                files.AddRange(directory.GetFiles(pattern, searchOption)
+                    .Where(file => file.CreationTime > DateTime.Now.AddMinutes(-(int)timeLimit) && !excludeFiles.Contains(file.Name)));*/
+            ProcessFolder(directory, files, timeLimit, pattern, excludeFiles, searchOption);
             // Process subfolders recursively
             foreach (var subDir in directory.GetDirectories("*", SearchOption.TopDirectoryOnly))
             {
