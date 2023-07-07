@@ -33,6 +33,8 @@ class SecureFileDelete
             return;
         }
 
+        
+
         // Perform secure file deletion
         PerformSecureFileDeletion(arguments);
     }
@@ -65,7 +67,8 @@ class SecureFileDelete
         { "e", "exclude_files" },
         { "r", "recursive" },
         { "h", "help"},
-        { "np", "no_prompt" }
+        { "np", "no_prompt" },
+        { "s", "simulate" } // Added "s" as a short alias for simulate
     };
 
         // Check short parameters and update the corresponding full parameter name
@@ -87,9 +90,10 @@ class SecureFileDelete
         List<string> excludeFiles = arguments.ContainsParameter("exclude_files") ? arguments.GetValue<string>("exclude_files").Split(',').ToList() : new List<string>();
         bool recursive = arguments.ContainsParameter("recursive");
         bool noPromptMode = arguments.ContainsParameter("no_prompt");
+        bool simulate = arguments.ContainsParameter("simulate"); // Check if simulate parameter is provided
 
         // Perform secure file deletion
-        PerformSecureFileDeletion(folder, timeLimit, pattern, excludeFiles, recursive, noPromptMode);
+        PerformSecureFileDeletion(folder, timeLimit, pattern, excludeFiles, recursive, noPromptMode, simulate);
     }
 
 
@@ -176,7 +180,7 @@ class SecureFileDelete
         }
     }
 
-    static void PerformSecureFileDeletion(string folder, int? timeLimit, string pattern, List<string> excludeFiles, bool recursive, bool noPromptMode)
+    static void PerformSecureFileDeletion(string folder, int? timeLimit, string pattern, List<string> excludeFiles, bool recursive, bool noPromptMode, bool simulate)
     {
         try
         {
@@ -245,7 +249,10 @@ class SecureFileDelete
                 {
                     try
                     {
-                        SecureDeleteFile(file.FullName);
+                        if (!simulate)
+                        {
+                            SecureDeleteFile(file.FullName);
+                        }
                         filesDeleted++;
                     }
                     catch (UnauthorizedAccessException)
