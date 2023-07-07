@@ -1,144 +1,112 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>User Manual - SafeDelete</title>
+    <title>SecureFileDelete User Manual</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            line-height: 1.5;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
         }
 
         h1 {
+            font-size: 30px;
             color: #333;
-            font-size: 32px;
+            margin-bottom: 20px;
         }
 
         h2 {
-            color: #555;
             font-size: 24px;
-            margin-top: 30px;
+            color: #333;
+            margin-bottom: 15px;
         }
 
-        h3 {
-            color: #777;
-            font-size: 20px;
-            margin-top: 20px;
+        p {
+            margin-bottom: 15px;
+        }
+
+        pre {
+            background-color: #f7f7f7;
+            padding: 10px;
+            overflow: auto;
+            margin-bottom: 15px;
         }
 
         code {
             font-family: Consolas, monospace;
-            background-color: #f5f5f5;
-            padding: 2px;
         }
 
-        pre {
-            background-color: #f5f5f5;
-            padding: 10px;
-            border-radius: 5px;
+        ol, ul {
+            margin-left: 30px;
+            margin-bottom: 15px;
         }
 
-        ul {
-            margin-left: 20px;
-        }
-
-        ol {
-            margin-left: 40px;
-        }
-
-        p {
-            line-height: 1.5;
-        }
-
-        a {
-            color: #007bff;
-            text-decoration: none;
+        li {
+            margin-bottom: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>User Manual - SafeDelete</h1>
-    <h2>Overview</h2>
-    <p>The SafeDelete program is used to securely delete files from a specified folder based on various criteria.</p>
+    <h1>SecureFileDelete User Manual</h1>
+
+    <h2>Introduction</h2>
+    <p>
+        Welcome to the SecureFileDelete user manual. SecureFileDelete is a command-line tool designed to securely delete files from a specified folder.
+        This manual provides step-by-step instructions on how to use the SecureFileDelete application.
+    </p>
+
+    <h2>Getting Started</h2>
+    <p>
+        To get started with SecureFileDelete, follow the steps below:
+    </p>
+
+    <ol>
+        <li>Ensure you have the latest version of SecureFileDelete installed on your system.</li>
+        <li>Open a command prompt or terminal.</li>
+        <li>Navigate to the directory where the SecureFileDelete executable is located.</li>
+    </ol>
 
     <h2>Usage</h2>
-    <pre><code>Usage: safedelete --folder &lt;folder_path&gt; [--time_limit &lt;minutes&gt;] [--pattern &lt;file_pattern&gt;] [--exclude_files &lt;file1,file2,...&gt;] [--recursive]
-       safedelete -f &lt;folder_path&gt; [-t &lt;minutes&gt;] [-p &lt;file_pattern&gt;] [-e &lt;file1,file2,...&gt;] [-r]
-    
-Parameters:
-  --folder, -f          : The path of the folder to delete files from. (required)
-  --time_limit, -t      : The time limit (in minutes) specifying the maximum file age. (optional)
-  --pattern, -p         : The file name pattern to match. (optional)
-  --exclude_files, -e   : Comma-separated list of files to exclude from deletion. (optional)
-  --recursive, -r       : Search for files in all subfolders. (optional)
-  --no_prompt, -np      : Enable no prompt mode. Files will be securely deleted without confirmation. (optional)
-  --help, -h            : Display usage information. (optional)</code></pre>
+    <p>
+        The SecureFileDelete application supports the following command-line parameters:
+    </p>
 
-    <h2>Command Line Arguments</h2>
-    <table>
-        <tr>
-            <th>Argument</th>
-            <th>Alias</th>
-            <th>Description</th>
-        </tr>
-        <tr>
-            <td>--folder</td>
-            <td>-f</td>
-            <td>The path of the folder to delete files from. (required)</td>
-        </tr>
-        <tr>
-            <td>--time_limit</td>
-            <td>-t</td>
-            <td>The time limit (in minutes) specifying the maximum file age. (optional)</td>
-        </tr>
-        <tr>
-            <td>--pattern</td>
-            <td>-p</td>
-            <td>The file name pattern to match. (optional)</td>
-        </tr>
-        <tr>
-            <td>--exclude_files</td>
-            <td>-e</td>
-            <td>Comma-separated list of files to exclude from deletion. (optional)</td>
-        </tr>
-        <tr>
-            <td>--recursive</td>
-            <td>-r</td>
-            <td>Search for files in all subfolders. (optional)</td>
-        </tr>
-        <tr>
-            <td>--no_prompt</td>
-            <td>-np</td>
-            <td>Enable no prompt mode. Files will be securely deleted without confirmation. (optional)</td>
-        </tr>
-        <tr>
-            <td>--help</td>
-            <td>-h</td>
-            <td>Display usage information. (optional)</td>
-        </tr>
-    </table>
-
-    <h2>Examples</h2>
     <pre><code>
-        safedelete --folder C:\Temp
-        safedelete -f C:\Temp -t 60 -p *.txt.   --exclude_files file1.txt,file2.txt -r
-        safedelete --folder /home/user/files --time_limit 30 --exclude_files important.docx,personal.jpg --recursive
+        --folder, -f          : The path of the folder to delete files from. (required)
+        --time_limit, -t      : The time limit (in minutes) specifying the maximum file age. (optional)
+        --pattern, -p         : The file name pattern to match. (optional)
+        --exclude_files, -e   : Comma-separated list of files to exclude from deletion. (optional)
+        --recursive, -r       : Search for files in all subfolders. (optional)
+        --no_prompt, -np      : Enable no prompt mode. Files will be securely deleted without confirmation. (optional)
+        --simulate, -s        : Enable simulate mode. Files will not be securely deleted, they will be simulated. (optional)
+        --help, -h            : Display usage information. (optional)
     </code></pre>
 
-    <h2>Notes</h2>
+    <h3>Examples</h3>
+    <p>Here are some examples of how to use the SecureFileDelete application:</p>
+
+    <pre><code>
+        safedelete --folder "C:\Documents" --time_limit 30 --pattern "*.txt" --exclude_files "important.txt" --recursive
+        safedelete -f "C:\Documents" -t 60 -p "*.docx" -e "backup.docx,temp.docx" -r -np
+    </code></pre>
+
+    <h2>Important Notes</h2>
     <ul>
-        <li>If the `--time_limit` parameter is not specified, all files in the folder will be considered for deletion.</li>
-        <li>The `--pattern` parameter accepts wildcards (*) to match multiple files. For example, `*.txt` will match all text files.</li>
-        <li>When using the `--exclude_files` parameter, provide a comma-separated list of files to exclude from deletion.</li>
-        <li>When the `--recursive` parameter is used, SafeDelete will search for files in all subfolders of the specified folder.</li>
-        <li>By default, SafeDelete prompts for confirmation before deleting each file. Use the `--no_prompt` parameter to enable no prompt mode.</li>
+        <li>Ensure that you have the necessary permissions to access and delete files from the specified folder.</li>
+        <li>Be cautious when using the <code>--no_prompt</code> or <code>--simulate</code> options, as they can lead to unintended file deletion.</li>
     </ul>
 
-    <h2>Security Considerations</h2>
-    <p>SafeDelete uses secure deletion techniques to prevent file recovery. However, ensure that you have the necessary permissions to delete files from the specified folder.</p>
+    <h2>Troubleshooting</h2>
+    <p>
+        If you encounter any issues or have questions regarding the SecureFileDelete application, please refer to the official documentation or contact our support team for assistance.
+    </p>
 
-    <h2>Disclaimer</h2>
-    <p>SafeDelete is provided as-is without any warranties. Use it at your own risk.</p>
-
+    <h2>Conclusion</h2>
+    <p>
+        Congratulations! You have successfully learned how to use the SecureFileDelete application to securely delete files from a specified folder.
+        Make sure to use the application responsibly and exercise caution when deleting files.
+    </p>
 </body>
 </html>
-

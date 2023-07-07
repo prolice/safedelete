@@ -1,102 +1,149 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SafeDelete Code Documentation</title>
+    <title>SecureFileDelete Technical Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        h2 {
+            font-size: 20px;
+        }
+
+        pre {
+            background-color: #f7f7f7;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        code {
+            font-family: Consolas, monospace;
+        }
+    </style>
 </head>
 <body>
-    <h1>Code Documentation</h1>
+    <h1>SecureFileDelete Technical Documentation</h1>
 
     <h2>Introduction</h2>
     <p>
-        Welcome to the code documentation for the SafeDelete app. This documentation provides an overview of the codebase and its various components.
+        This document provides technical documentation for the SecureFileDelete application.
+        SecureFileDelete is a command-line tool designed to securely delete files from a specified folder.
     </p>
 
-    <h2>Table of Contents</h2>
+    <h2>Code Overview</h2>
+    <p>
+        The SecureFileDelete application is implemented in C#. It consists of a single class named <code>SecureFileDelete</code>.
+        The class contains various methods for performing secure file deletion based on the provided command-line arguments.
+    </p>
+
+    <h2>Usage</h2>
+    <pre><code>
+        Usage: safedelete --folder &lt;folder_path&gt; [--time_limit &lt;minutes&gt;] [--pattern &lt;file_pattern&gt;] [--exclude_files &lt;file1,file2,...&gt;] [--recursive]
+               safedelete -f &lt;folder_path&gt; [-t &lt;minutes&gt;] [-p &lt;file_pattern&gt;] [-e &lt;file1,file2,...&gt;] [-r]
+
+        Parameters:
+          --folder, -f          : The path of the folder to delete files from. (required)
+          --time_limit, -t      : The time limit (in minutes) specifying the maximum file age. (optional)
+          --pattern, -p         : The file name pattern to match. (optional)
+          --exclude_files, -e   : Comma-separated list of files to exclude from deletion. (optional)
+          --recursive, -r       : Search for files in all subfolders. (optional)
+          --no_prompt, -np      : Enable no prompt mode. Files will be securely deleted without confirmation. (optional)
+          --simulate, -s        : Enable simulate mode. Files will not be securely deleted, they will be simulated. (optional)
+          --help, -h            : Display usage information. (optional)
+    </code></pre>
+
+    <h2>Code Documentation</h2>
+    <h3>Class: SecureFileDelete</h3>
+
+    <h4>Methods</h4>
     <ul>
-        <li><a href="#installation">Installation</a></li>
-        <li><a href="#usage">Usage</a></li>
-        <li><a href="#classes">Classes</a></li>
-        <li><a href="#functions">Functions</a></li>
-        <li><a href="#examples">Examples</a></li>
-        <li><a href="#contributing">Contributing</a></li>
+        <li>
+            <code>Main(string[] args)</code>
+            <p>The entry point of the application. Parses command-line arguments and performs secure file deletion.</p>
+        </li>
+        <li>
+            <code>Usage()</code>
+            <p>Displays the usage information and available parameters.</p>
+        </li>
+        <li>
+            <code>PerformSecureFileDeletion(CommandLineArguments arguments)</code>
+            <p>Performs secure file deletion based on the provided command-line arguments.</p>
+        </li>
+        <li>
+            <code>ParseArguments(string[] args)</code>
+            <p>Parses the command-line arguments and returns a <code>CommandLineArguments</code> object.</p>
+        </li>
+        <li>
+            <code>PerformSecureFileDeletion(string folder, int? timeLimit, string pattern, List&lt;string&gt; excludeFiles, bool recursive, bool noPromptMode, bool simulate)</code>
+            <p>Performs secure file deletion with the specified parameters.</p>
+        </li>
+        <li>
+            <code>ProcessFolder(DirectoryInfo folder, List&lt;FileInfo&gt; files, int? timeLimit, string pattern, List&lt;string&gt; excludeFiles, SearchOption searchOption)</code>
+            <p>Recursively processes a folder and collects files matching the specified criteria.</p>
+        </li>
+        <li>
+            <code>UpdateProgressBar(int currentFilesDeleted, int totalFiles)</code>
+            <p>Updates the progress bar during file deletion.</p>
+        </li>
+        <li>
+            <code>DeleteEmptySubfolders(string rootFolder)</code>
+            <p>Deletes empty subfolders within the specified root folder.</p>
+        </li>
+        <li>
+            <code>SecureDeleteFile(string filePath)</code>
+            <p>Performs secure deletion of a file by overwriting its content with random and null values.</p>
+        </li>
+        <li>
+            <code>OverwriteWithRandomData(FileStream stream, long fileSize)</code>
+            <p>Overwrites a file stream with random data.</p>
+        </li>
+        <li>
+            <code>OverwriteWithNullValues(FileStream stream, long fileSize)</code>
+            <p>Overwrites a file stream with null values.</p>
+        </li>
+        <li>
+            <code>OverwriteWithZeroValues(FileStream stream, long fileSize)</code>
+            <p>Overwrites a file stream with zero values.</p>
+        </li>
+        <li>
+            <code>OverwriteWithAlternatingPattern(FileStream stream, long fileSize)</code>
+            <p>Overwrites a file stream with an alternating pattern of 0xFF and 0x00.</p>
+        </li>
+        <li>
+            <code>OverwriteWithEncryptedRandomData(FileStream stream, long fileSize)</code>
+            <p>Overwrites a file stream with encrypted random data.</p>
+        </li>
     </ul>
 
-    <h2 id="installation">Installation</h2>
-    <p>
-        To use the SafeDelete app, follow these steps:
-    </p>
-    <ol>
-        <li>Download the latest version of the app from the repository.</li>
-        <li>Install the required dependencies.</li>
-        <li>Set up the app configuration.</li>
-        <li>Run the app on your local machine or deploy it to a server.</li>
-    </ol>
+    <h3>Class: CommandLineArguments</h3>
+    <p>A helper class for parsing and managing command-line arguments.</p>
 
-    <h2 id="usage">Usage</h2>
-    <p>
-        To use the SafeDelete app, follow these steps:
-    </p>
-    <ol>
-        <li>Launch the app on your device.</li>
-        <li>Select the files or folders you want to delete securely.</li>
-        <li>Click on the "Safe Delete" button to securely delete the selected files.</li>
-    </ol>
-
-    <h2 id="classes">Classes</h2>
-    <h3>SafeDelete</h3>
-    <p>
-        The SafeDelete class provides methods for securely deleting files and folders.
-    </p>
+    <h4>Methods</h4>
     <ul>
-        <li><code>constructor(options)</code> - Creates a new instance of the SafeDelete class with the specified options.</li>
-        <li><code>deleteFile(filePath)</code> - Securely deletes the file at the specified file path.</li>
-        <li><code>deleteFolder(folderPath)</code> - Securely deletes the folder and its contents at the specified folder path.</li>
+        <li>
+            <code>AddParameter(string name, string value)</code>
+            <p>Adds a parameter with the specified name and value.</p>
+        </li>
+        <li>
+            <code>ContainsParameter(string name)</code>
+            <p>Checks if the specified parameter exists.</p>
+        </li>
+        <li>
+            <code>GetValue&lt;T&gt;(string name)</code>
+            <p>Retrieves the value of the specified parameter and converts it to the specified type.</p>
+        </li>
+        <li>
+            <code>RemoveParameter(string name)</code>
+            <p>Removes the specified parameter.</p>
+        </li>
     </ul>
 
-    <h2 id="functions">Functions</h2>
-    <h3>encryptFile(filePath)</h3>
-    <p>
-        This function encrypts the file at the specified file path using a secure encryption algorithm.
-    </p>
-    <ul>
-        <li><code>filePath</code> - The path to the file to be encrypted.</li>
-    </ul>
-
-    <h3>overwriteWithRandomData(filePath)</h3>
-    <p>
-        This function overwrites the contents of the file at the specified file path with random data to securely delete its original contents.
-    </p>
-    <ul>
-        <li><code>filePath</code> - The path to the file to be overwritten with random data.</li>
-    </ul>
-
-    <h2 id="examples">Examples</h2>
-    <p>
-        Here's an example demonstrating the usage of the SafeDelete app:
-    </p>
-    <pre><code>// Create an instance of SafeDelete
-const safeDelete = new SafeDelete();
-
-// Delete a file securely
-safeDelete.deleteFile('/path/to/file.txt');
-
-// Delete a folder securely
-safeDelete.deleteFolder('/path/to/folder');</code></pre>
-
-    <h2 id="contributing">Contributing</h2>
-    <p>
-        Contributions are welcome! To contribute to the SafeDelete app, follow these guidelines:
-    </p>
-    <ol>
-        <li>Fork the project repository.</li>
-        <li>Create a new branch for your feature or bug fix.</li>
-        <li>Make your changes and commit them with descriptive messages.</li>
-        <li>Push your changes to your forked repository.</li>
-        <li>Submit a pull request to the main project repository.</li>
-    </ol>
-
-    <p>
-        Thank you for using and contributing to the SafeDelete app!
-    </p>
 </body>
 </html>

@@ -1,40 +1,38 @@
-# Release Note - Version 0.0.2
+# Release Note - Version 0.1-alpha1
 
-## Overview
+## Features
 
-Version 0.0.2 of SafeDelete introduces several enhancements and bug fixes to improve the functionality and user experience of the tool.
+- Securely delete files from a specified folder.
+- Support for specifying a time limit to delete files based on their age.
+- Option to provide a file name pattern to match specific files for deletion.
+- Exclude specific files from deletion using a comma-separated list.
+- Ability to search for files in all subfolders recursively.
+- No prompt mode to enable automatic file deletion without confirmation.
+- Simulate mode to test the file deletion process without actually deleting files.
+- Display usage information with the `--help` or `-h` parameter.
+- Display the application version with the `--version` parameter.
 
-## Changes
+## Usage
 
-- Improved file deletion performance for large folders.
-- Added support for excluding files from deletion using the `--exclude_files` option.
-- Fixed a bug where the tool would crash when encountering certain file types.
-- Updated the user interface to provide clearer prompts and messages during file deletion.
-- Enhanced error handling and error messages for better troubleshooting.
-- Added a new command-line option `--no_prompt` to enable no prompt mode for faster file deletion without confirmation.
+```bash
+safedelete --folder <folder_path> [--time_limit <minutes>] [--pattern <file_pattern>] [--exclude_files <file1,file2,...>] [--recursive] [--no_prompt] [--simulate]
+safedelete -f <folder_path> [-t <minutes>] [-p <file_pattern>] [-e <file1,file2,...>] [-r] [-np] [-s]
 
-## How to Upgrade
+## Parameters
 
-To upgrade to version 0.0.2, follow these steps:
+- `--folder`, `-f`: The path of the folder to delete files from. (required)
+- `--time_limit`, `-t`: The time limit (in minutes) specifying the maximum file age. (optional)
+- `--pattern`, `-p`: The file name pattern to match. (optional)
+- `--exclude_files`, `-e`: Comma-separated list of files to exclude from deletion. (optional)
+- `--recursive`, `-r`: Search for files in all subfolders. (optional)
+- `--no_prompt`, `-np`: Enable no prompt mode. Files will be securely deleted without confirmation. (optional)
+- `--simulate`, `-s`: Enable simulate mode. Files will not be securely deleted, they will be simulated. (optional)
+- `--help`, `-h`: Display usage information. (optional)
+- `--version`: Display the application version. (optional)
 
-1. Download the latest release package from the SafeDelete repository.
-2. Extract the contents of the package to a local directory.
-3. Replace the previous version of SafeDelete with the new version by overwriting the existing files.
-4. Ensure that any custom configurations or settings are migrated to the new version if necessary.
-5. Verify the installation by running `safedelete --version` and ensure that it displays `0.0.2`.
 
-## Feedback and Support
+Please note that this is an alpha version of the SecureFileDelete application and may contain bugs or incomplete features. Use it with caution.
 
-We value your feedback! If you encounter any issues or have suggestions for improvement, please don't hesitate to reach out to us. You can contact our support team at support@safedelete.com or open an issue on the SafeDelete repository.
+Thank you for using SecureFileDelete version 0.1-alpha1! We appreciate your feedback and contributions to improve the application.
 
-## Known Issues
-
-The following known issues exist in version 0.0.2:
-
-- In certain cases, the progress indicator may not accurately reflect the actual progress of file deletion.
-- Excluding a large number of files using the `--exclude_files` option may cause a slight delay in the deletion process.
-
-We are actively working on addressing these issues and plan to resolve them in future releases.
-
-Thank you for using SafeDelete!
-
+If you have any questions or need assistance, please reach out to our support team.
