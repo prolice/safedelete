@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 
 class SecureFileDelete
 {
@@ -13,7 +15,7 @@ class SecureFileDelete
     {
         if (args.Contains("--version"))
         {
-            Console.WriteLine("App Version: " + AppVersion);
+            Console.WriteLine("App Version: [ALPHA]" + AppVersion);
             return;
         }
         // Parse command line arguments
@@ -41,9 +43,12 @@ class SecureFileDelete
 
     static void Usage()
     {
+
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Usage: safedelete --folder <folder_path> [--time_limit <minutes>] [--pattern <file_pattern>] [--exclude_files <file1,file2,...>] [--recursive]");
         Console.WriteLine("       safedelete -f <folder_path> [-t <minutes>] [-p <file_pattern>] [-e <file1,file2,...>] [-r]");
         Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Gray;
         Console.WriteLine("Parameters:");
         Console.WriteLine("  --folder, -f          : The path of the folder to delete files from. (required)");
         Console.WriteLine("  --time_limit, -t      : The time limit (in minutes) specifying the maximum file age. (optional)");
@@ -51,7 +56,9 @@ class SecureFileDelete
         Console.WriteLine("  --exclude_files, -e   : Comma-separated list of files to exclude from deletion. (optional)");
         Console.WriteLine("  --recursive, -r       : Search for files in all subfolders. (optional)");
         Console.WriteLine("  --no_prompt, -np      : Enable no prompt mode. Files will be securely deleted without confirmation. (optional)");
+        Console.WriteLine("  --simulate, -s        : Enable simulate mode. Files will not be securely deleted, they will be simulated. (optional)");
         Console.WriteLine("  --help, -h            : Display usage information. (optional)");
+        Console.ForegroundColor = ConsoleColor.White;
     }
 
 
@@ -158,14 +165,18 @@ class SecureFileDelete
                 catch (FormatException)
                 {
                     // Handle invalid value format error
+                    Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.WriteLine($"Invalid value format for parameter: {name}");
+                    Console.ForegroundColor = ConsoleColor.White;
                     Usage();
                     Environment.Exit(1);
                 }
                 catch (InvalidCastException)
                 {
                     // Handle invalid value type error
+                    Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.WriteLine($"Invalid value type for parameter: {name}");
+                    Console.ForegroundColor = ConsoleColor.White;
                     Usage();
                     Environment.Exit(1);
                 }
@@ -189,6 +200,7 @@ class SecureFileDelete
             SearchOption searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             List<FileInfo> files = new List<FileInfo>();
 
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("### Files to be securely deleted ###");
 
             ProcessFolder(directory, files, timeLimit, pattern, excludeFiles, searchOption);
@@ -202,6 +214,7 @@ class SecureFileDelete
                 }
                 catch (UnauthorizedAccessException)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Access denied: {subDir.FullName}");
                     // Continue processing other subfolders
                 }
@@ -213,16 +226,24 @@ class SecureFileDelete
 
             if (files.Count == 0)
             {
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("No files found matching the specified criteria.");
+                Console.ForegroundColor = ConsoleColor.White;
                 return;
             }
             else
             {
                 foreach (FileInfo file in files)
                 {
+                    Console.ForegroundColor = ConsoleColor.DarkGreen; 
                     Console.WriteLine(file.FullName);
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"#Files found matching the specified criteria: {files.Count}");
+
+                long totalSize = files.Sum(file => file.Length);
+                Console.WriteLine($"Total size of files to be deleted: {FormatSize(totalSize)}");
             }
             
             
@@ -231,6 +252,7 @@ class SecureFileDelete
             if (!noPromptMode)
             {
                 // Confirm file deletion
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("Are you sure you want to delete these files? (yes/no): ");
                 confirmation = Console.ReadLine()?.Trim().ToLower();
             }
@@ -245,7 +267,8 @@ class SecureFileDelete
                 Console.Write("[");
                 Console.CursorVisible = false;
 
-                foreach (FileInfo file in files)
+                //foreach (FileInfo file in files)
+                Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (file, state) =>
                 {
                     try
                     {
@@ -253,20 +276,16 @@ class SecureFileDelete
                         {
                             SecureDeleteFile(file.FullName);
                         }
-                        filesDeleted++;
+                        int currentFilesDeleted = Interlocked.Increment(ref filesDeleted);
+
+                        // Update the progress bar
+                        UpdateProgressBar(currentFilesDeleted, numFiles);
                     }
                     catch (UnauthorizedAccessException)
                     {
-                        skippedFolders++;
+                        Interlocked.Increment(ref skippedFolders);
                     }
-
-                    // Update the progress bar
-                    double progress = (double)filesDeleted / numFiles;
-                    int progressBarLength = (int)(progressBarWidth * progress);
-                    string progressBar = new string('#', progressBarLength).PadRight(progressBarWidth);
-                    Console.SetCursorPosition(1, Console.CursorTop);
-                    Console.Write(progressBar);
-                }
+                });
 
                 // Complete the progress bar
                 Console.WriteLine("] Done");
@@ -274,6 +293,7 @@ class SecureFileDelete
 
                 if (skippedFolders > 0)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Skipped {skippedFolders} folder(s) due to access errors.");
                 }
 
@@ -284,12 +304,16 @@ class SecureFileDelete
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("File deletion canceled.");
             }
+            Console.ForegroundColor = ConsoleColor.White;
         }
         catch (Exception ex)
         {
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("Error: " + ex.Message);
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 
@@ -317,17 +341,39 @@ class SecureFileDelete
                 }
                 catch (UnauthorizedAccessException)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Access denied: {subfolder.FullName}");
+                    Console.ForegroundColor = ConsoleColor.White;
                     // Continue processing other subfolders
                 }
             }
         }
         catch (UnauthorizedAccessException)
         {
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine($"Access denied: {folder.FullName}");
+            Console.ForegroundColor = ConsoleColor.White;
             // Continue processing other subfolders
         }
     }
+
+    static object lockObject = new object();
+
+    static void UpdateProgressBar(int currentFilesDeleted, int totalFiles)
+    {
+        double progress = (double)currentFilesDeleted / totalFiles;
+        int progressBarLength = (int)(progressBarWidth * progress);
+        string progressBar = new string('#', progressBarLength).PadRight(progressBarWidth);
+
+        lock (lockObject)
+        {
+            Console.SetCursorPosition(1, Console.CursorTop);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write(progressBar);
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+    }
+
 
     class FileInfoEqualityComparer : IEqualityComparer<FileInfo>
     {
@@ -352,6 +398,21 @@ class SecureFileDelete
         }
     }
 
+    static string FormatSize(long size)
+    {
+        string[] suffixes = { "B", "Ko", "Mo", "Go", "To" };
+        int suffixIndex = 0;
+        double formattedSize = size;
+
+        while (formattedSize >= 1024 && suffixIndex < suffixes.Length - 1)
+        {
+            formattedSize /= 1024;
+            suffixIndex++;
+        }
+
+        return $"{formattedSize:0.##} {suffixes[suffixIndex]}";
+    }
+
     static void SecureDeleteFile(string filePath)
     {
         try
@@ -359,7 +420,9 @@ class SecureFileDelete
             // Check if the file exists
             if (!File.Exists(filePath))
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Error: File does not exist.");
+                Console.ForegroundColor = ConsoleColor.White;
                 return;
             }
 
@@ -431,7 +494,9 @@ class SecureFileDelete
         }
         catch (Exception ex)
         {
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("Error: " + ex.Message);
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 
@@ -553,7 +618,9 @@ class SecureFileDelete
             if (Directory.GetFiles(subfolder).Length == 0 && Directory.GetDirectories(subfolder).Length == 0)
             {
                 Directory.Delete(subfolder);
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Empty subfolder deleted: " + subfolder);
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
     }
