@@ -8,6 +8,7 @@ class SecureFileDelete
 {
     // Define the version of the app
     private static readonly string AppVersion = typeof(SecureFileDelete).Assembly.GetName().Version.ToString();
+    private static int progressBarWidth = 40; // Width of the progress bar
     static void Main(string[] args)
     {
         if (args.Contains("--version"))
@@ -182,33 +183,40 @@ class SecureFileDelete
             // Get the files in the folder (and subfolders if recursive is true) that match the specified criteria
             DirectoryInfo directory = new DirectoryInfo(folder);
             SearchOption searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            FileInfo[] files;
+            List<FileInfo> files = new List<FileInfo>();
 
-            if (timeLimit != null)
+            Console.WriteLine("### Files to be securely deleted ###");
+
+            // Process subfolders recursively
+            foreach (var subDir in directory.GetDirectories("*", SearchOption.TopDirectoryOnly))
             {
-                int timeLimitValue = (int)timeLimit;
-                files = directory.GetFiles(pattern, searchOption)
-                    .Where(file => file.CreationTime > DateTime.Now.AddMinutes(-timeLimitValue) && !excludeFiles.Contains(file.Name))
-                    .ToArray();
-            }
-            else
-            {
-                files = directory.GetFiles(pattern, searchOption)
-                    .Where(file => !excludeFiles.Contains(file.Name))
-                    .ToArray();
+                try
+                {
+                    ProcessFolder(subDir, files, timeLimit, pattern, excludeFiles, searchOption);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    Console.WriteLine($"Access denied: {subDir.FullName}");
+                    // Continue processing other subfolders
+                }
             }
 
-            if (files.Length == 0)
+            if (files.Count == 0)
             {
                 Console.WriteLine("No files found matching the specified criteria.");
                 return;
             }
-
-            Console.WriteLine("### Files to be securely deleted ###");
-            foreach (FileInfo file in files)
+            else
             {
-                Console.WriteLine(file.FullName);
+                foreach (FileInfo file in files)
+                {
+                    Console.WriteLine(file.FullName);
+                }
+                Console.WriteLine($"#Files found matching the specified criteria: {files.Count}");
             }
+            
+            
+
             string confirmation = "y";
             if (!noPromptMode)
             {
@@ -216,14 +224,44 @@ class SecureFileDelete
                 Console.Write("Are you sure you want to delete these files? (yes/no): ");
                 confirmation = Console.ReadLine()?.Trim().ToLower();
             }
-            
 
             if (confirmation.Contains("y"))
             {
+                int numFiles = files.Count;
+                int filesDeleted = 0;
+                int skippedFolders = 0;
+
+                // Initialize the progress bar
+                Console.Write("[");
+                Console.CursorVisible = false;
+
                 foreach (FileInfo file in files)
                 {
-                    SecureDeleteFile(file.FullName);
-                    Console.WriteLine("File securely deleted: " + file.FullName);
+                    try
+                    {
+                        SecureDeleteFile(file.FullName);
+                        filesDeleted++;
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        skippedFolders++;
+                    }
+
+                    // Update the progress bar
+                    double progress = (double)filesDeleted / numFiles;
+                    int progressBarLength = (int)(progressBarWidth * progress);
+                    string progressBar = new string('#', progressBarLength).PadRight(progressBarWidth);
+                    Console.SetCursorPosition(1, Console.CursorTop);
+                    Console.Write(progressBar);
+                }
+
+                // Complete the progress bar
+                Console.WriteLine("] Done");
+                Console.CursorVisible = true;
+
+                if (skippedFolders > 0)
+                {
+                    Console.WriteLine($"Skipped {skippedFolders} folder(s) due to access errors.");
                 }
 
                 if (recursive)
@@ -235,14 +273,50 @@ class SecureFileDelete
             {
                 Console.WriteLine("File deletion canceled.");
             }
-            
-
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error: " + ex.Message);
         }
     }
+
+    static void ProcessFolder(DirectoryInfo folder, List<FileInfo> files, int? timeLimit, string pattern, List<string> excludeFiles, SearchOption searchOption)
+    {
+        try
+        {
+            FileInfo[] folderFiles = folder.GetFiles(pattern, searchOption)
+                .Where(file => !excludeFiles.Contains(file.Name)).ToArray();
+
+            if (timeLimit != null)
+            {
+                int timeLimitValue = (int)timeLimit;
+                folderFiles = folderFiles
+                    .Where(file => file.CreationTime > DateTime.Now.AddMinutes(-timeLimitValue)).ToArray();
+            }
+
+            files.AddRange(folderFiles);
+
+            foreach (var subfolder in folder.GetDirectories("*", SearchOption.TopDirectoryOnly))
+            {
+                try
+                {
+                    ProcessFolder(subfolder, files, timeLimit, pattern, excludeFiles, searchOption);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    Console.WriteLine($"Access denied: {subfolder.FullName}");
+                    // Continue processing other subfolders
+                }
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Console.WriteLine($"Access denied: {folder.FullName}");
+            // Continue processing other subfolders
+        }
+    }
+
+
 
     static void SecureDeleteFile(string filePath)
     {
@@ -319,7 +393,7 @@ class SecureFileDelete
             // Delete the renamed file
             File.Delete(tempFilePath);
 
-            Console.WriteLine("File securely deleted.");
+            //Console.WriteLine("File securely deleted.");
         }
         catch (Exception ex)
         {
