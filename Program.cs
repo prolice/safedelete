@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+
 
 class SecureFileDelete
 {
@@ -57,6 +60,7 @@ class SecureFileDelete
         Console.WriteLine("  --recursive, -r       : Search for files in all subfolders. (optional)");
         Console.WriteLine("  --no_prompt, -np      : Enable no prompt mode. Files will be securely deleted without confirmation. (optional)");
         Console.WriteLine("  --simulate, -s        : Enable simulate mode. Files will not be securely deleted, they will be simulated. (optional)");
+        Console.WriteLine("  --force, -fo          : The file or folder with protected access will be deleted. (optional)");
         Console.WriteLine("  --help, -h            : Display usage information. (optional)");
         Console.ForegroundColor = ConsoleColor.White;
     }
@@ -75,7 +79,8 @@ class SecureFileDelete
         { "r", "recursive" },
         { "h", "help"},
         { "np", "no_prompt" },
-        { "s", "simulate" } // Added "s" as a short alias for simulate
+        { "s", "simulate" },// Added "s" as a short alias for simulate
+        { "fo", "force" },
     };
 
         // Check short parameters and update the corresponding full parameter name
@@ -98,9 +103,10 @@ class SecureFileDelete
         bool recursive = arguments.ContainsParameter("recursive");
         bool noPromptMode = arguments.ContainsParameter("no_prompt");
         bool simulate = arguments.ContainsParameter("simulate"); // Check if simulate parameter is provided
+        bool force = arguments.ContainsParameter("force"); // Check if force parameter is provided
 
         // Perform secure file deletion
-        PerformSecureFileDeletion(folder, timeLimit, pattern, excludeFiles, recursive, noPromptMode, simulate);
+        PerformSecureFileDeletion(folder, timeLimit, pattern, excludeFiles, recursive, noPromptMode, simulate, force);
     }
 
 
@@ -191,14 +197,31 @@ class SecureFileDelete
         }
     }
 
-    static void PerformSecureFileDeletion(string folder, int? timeLimit, string pattern, List<string> excludeFiles, bool recursive, bool noPromptMode, bool simulate)
+    static void PerformSecureFileDeletion(string folder, int? timeLimit, string pattern, List<string> excludeFiles, bool recursive, bool noPromptMode, bool simulate, bool force)
     {
         try
         {
+
+            // Check if the current user has administrative privileges
+            if (!IsUserAdmin() && force)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Console.WriteLine("Admin access required.");
+                Console.ForegroundColor = ConsoleColor.White;
+                return;
+            }
+
+             
             // Get the files in the folder (and subfolders if recursive is true) that match the specified criteria
             DirectoryInfo directory = new DirectoryInfo(folder);
             SearchOption searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             List<FileInfo> files = new List<FileInfo>();
+
+            // Disable file system redirection to access system-protected folders on 64-bit systems
+            if (Environment.Is64BitOperatingSystem && force)
+            {
+                Wow64DisableWow64FsRedirection(out IntPtr oldValue);
+            }
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("### Files to be securely deleted ###");
@@ -314,6 +337,14 @@ class SecureFileDelete
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("Error: " + ex.Message);
             Console.ForegroundColor = ConsoleColor.White;
+        }
+        finally
+        {
+            // Re-enable file system redirection if it was disabled
+            if (Environment.Is64BitOperatingSystem && force)
+            {
+                Wow64RevertWow64FsRedirection(IntPtr.Zero);
+            }
         }
     }
 
@@ -624,5 +655,20 @@ class SecureFileDelete
             }
         }
     }
+
+    static bool IsUserAdmin()
+    {
+        using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+        {
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+    }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern bool Wow64DisableWow64FsRedirection(out IntPtr oldValue);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern bool Wow64RevertWow64FsRedirection(IntPtr oldValue);
 
 }
